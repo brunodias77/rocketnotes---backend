@@ -1,22 +1,14 @@
 import express from "express";
-import { connection } from "./database/knex/index";
+import { routes } from "./routes/index";
+import { errorMiddleware } from "./middlewares/error";
+
 const app = express();
 
 app.use(express.json());
+app.use(errorMiddleware);
+app.use(routes);
+
 const port = 8080;
-
-async function addUser() {
-  await connection("users").insert({
-    name: "Bruno",
-    email: "bruno@teste.com",
-    password: "123456",
-  });
-}
-addUser();
-
-app.get("/", (req, res) => {
-  res.send("Usuário criado com sucesso");
-});
 
 app.listen(port, () => {
   return console.log("Servidor ONLINE  🚀 !!! ");
