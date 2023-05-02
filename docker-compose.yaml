@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  db_rocketnotes:
+    image: postgres
+    container_name: db_rocketnotes
+    restart: always
+    ports:
+      - 5433:5432
+    tty: true
+    environment:
+      - POSTGRES_USER=rocketnotes
+      - POSTGRES_PASSWORD=rocketnotes_password
+      - POSTGRES_DB=rocketnotes_db
+    networks:
+      - node-network
+
+networks:
+  node-network:
+    driver: bridge
