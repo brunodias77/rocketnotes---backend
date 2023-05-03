@@ -6,9 +6,6 @@ import { connection } from "../database/knex/index";
 export class UserController {
   async create(request: Request, response: Response) {
     const { name, email, password } = request.body;
-    console.log(name, email, password);
-
-    console.log("aqui antes de dar merda");
     const checkUserExists = await connection
       .select("*")
       .from("users")
@@ -28,13 +25,11 @@ export class UserController {
   async update(request: Request, response: Response) {
     const { name, email, password, old_password } = request.body;
     const { user_id } = request.params;
-    console.log(name, email, password, old_password, user_id);
     const checkUserExists = await connection
       .select("*")
       .from("users")
       .where("id", user_id)
       .first();
-    console.log(checkUserExists);
     if (!checkUserExists) {
       throw new AppError("Usuario nao encontrado", 404);
     }
@@ -43,7 +38,6 @@ export class UserController {
       .from("users")
       .where("email", email)
       .first();
-    console.log(newEmailAlreadyExists);
     if (newEmailAlreadyExists && newEmailAlreadyExists.id !== user_id) {
       throw new AppError("Este email ja esta em uso", 400);
     }
@@ -64,11 +58,6 @@ export class UserController {
     }
     checkUserExists.name = name ?? checkUserExists.name;
     checkUserExists.email = email ?? checkUserExists.email;
-    console.log(
-      checkUserExists.name,
-      checkUserExists.email,
-      checkUserExists.password
-    );
     await connection("users").where({ id: user_id }).update(
       {
         name: checkUserExists.name,

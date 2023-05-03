@@ -1,48 +1,49 @@
 import { connection } from "../database/knex/index";
 import { Request, Response } from "express";
+import AppError from "../utils/appError";
 
 type Notes = {
   title: string;
-  description: string;
+  descriptions: string;
   tags: string[];
   links: string[];
 };
 
 export default class NotesController {
   async create(request: Request, response: Response) {
-    console.log("aqui");
-    const { title, description, tags, links } = request.body as Notes;
+    const { title, descriptions, tags, links } = request.body as Notes;
     const { user_id } = request.params;
-    console.log(title, description, tags, links, user_id);
-    const notes_id = await connection("notes").insert({
-      title,
-      description,
-      user_id,
+    const checkUserExists = await connection
+      .select("*")
+      .from("users")
+      .where("id", user_id)
+      .first();
+    if (!checkUserExists) {
+      throw new AppError("Usuario nao encontrado", 404);
+    }
+    const [note_id] = await connection("notes")
+      .insert({
+        title,
+        descriptions,
+        user_id,
+      })
+      .returning("id");
+    const linksInsert = links.map((link) => {
+      return {
+        note_id: note_id.id,
+        url: link,
+      };
     });
-    console.log(notes_id);
-    // const linksInsert = links.map((link) => {
-    //   return {
-    //     notes_id,
-    //     url: link,
-    //   };
-    // });
-    // [
-    //   { notes_id: [ 8 ], url: 'links1' },
-    //   { notes_id: [ 8 ], url: 'link2' }
-    // ]
-    // insert into `links` (`notes_id`, `url`) select 8 as `notes_id`, 'links1' as `url` union all select 8 as `notes_id`, 'link2' as `url` - SQLITE_CONSTRAINT: FOREIGN KEY constraint failed
-    // console.log(notes_id);
-    // console.log(linksInsert);
-    // await connection("links").insert(linksInsert);
-    // const tagsInsert = tags.map((name) => {
-    //   return {
-    //     notes_id,
-    //     name,
-    //     user_id,
-    //   };
-    // });
-    // await connection("tags").insert(tagsInsert);
-    // response.json();
+    await connection("links").insert(linksInsert);
+    const tagsInsert = tags.map((name) => {
+      return {
+        note_id: note_id.id,
+        name,
+        user_id,
+      };
+    });
+    await connection("tags").insert(tagsInsert);
+    response.json({ message: "tags inserted" });
   }
 
   // async show(request: Request, response: Response) {
