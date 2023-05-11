@@ -46,29 +46,31 @@ export default class NotesController {
     response.json({ message: "tags inserted" });
   }
 
-  // async show(request: Request, response: Response) {
-  //   const { id } = request.params;
+  async show(request: Request, response: Response) {
+    const { id } = request.params;
 
-  //   const note = await knex("notes").where({ id }).first();
-  //   const tags = await knex("tags").where({ note_id: id }).orderBy("name");
-  //   const links = await knex("links")
-  //     .where({ note_id: id })
-  //     .orderBy("created_at");
+    const note = await connection("notes").where({ id }).first();
+    const tags = await connection("tags")
+      .where({ note_id: id })
+      .orderBy("name");
+    const links = await connection("links")
+      .where({ note_id: id })
+      .orderBy("created_at");
 
-  //   return response.json({
-  //     ...note,
-  //     tags,
-  //     links,
-  //   });
-  // }
+    return response.json({
+      ...note,
+      tags,
+      links,
+    });
+  }
 
-  // async delete(request: Request, response: Response) {
-  //   const { id } = request.params;
+  async delete(request: Request, response: Response) {
+    const { id } = request.params;
 
-  //   await knex("notes").where({ id }).delete();
+    await connection("notes").where({ id }).delete();
 
-  //   return response.json();
-  // }
+    return response.json();
+  }
 
   // async index(request: Request, response: Response) {
   //   const { title, user_id, tags } = request.query;
