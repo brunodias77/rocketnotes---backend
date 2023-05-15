@@ -24,7 +24,7 @@ export class UserController {
 
   async update(request: Request, response: Response) {
     const { name, email, password, old_password } = request.body;
-    const { user_id } = request.params;
+    const user_id = request.user;
     const checkUserExists = await connection
       .select("*")
       .from("users")
